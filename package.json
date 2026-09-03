@@ -1,0 +1,14 @@
+{
+  "name": "thetwifordstrydc",
+  "private": true,
+  "type": "module",
+  "description": "The Twifords Try D.C. — a password-protected dining book for Jack & Anne with eight restaurants and real gift cards.",
+  "engines": { "node": ">=22" },
+  "scripts": {
+    "dev": "node scripts/dev-server.mjs",
+    "test": "node --test 'tests/**/*.test.js'"
+  },
+  "dependencies": {
+    "@vercel/functions": "^3.0.0"
+  }
+}

@@ -1,0 +1,8 @@
+node_modules/
+.vercel/
+.DS_Store
+# Local env (site password, session secret, gift card JSON). Set the same vars in Vercel for production.
+.env*.local
+# Plaintext gift card codes. Only ever shipped via the GIFT_CARDS_JSON env var, never as a static file.
+secrets/*
+!secrets/gift-cards.example.json

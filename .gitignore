@@ -6,3 +6,4 @@ node_modules/
 # Plaintext gift card codes. Only ever shipped via the GIFT_CARDS_JSON env var, never as a static file.
 secrets/*
 !secrets/gift-cards.example.json
+.vercel

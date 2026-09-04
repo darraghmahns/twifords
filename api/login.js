@@ -1,3 +1,4 @@
 import { createLoginHandler } from '../lib/handlers.js';
+import { nodeHandler } from '../lib/node-adapter.js';
 
-export default createLoginHandler();
+export default nodeHandler(createLoginHandler());

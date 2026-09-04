@@ -34,7 +34,8 @@ Local: copy `.env.example` to `.env.local`. Production: `vercel env add NAME pro
   `site.css`, `map.css`, `login.css` page layout
 - `public/scripts/restaurants.js` the four tables (public data only, `giftCard` is metadata not codes)
 - `public/scripts/voucher-model.js` pure view-model for the gift card panel
-- `lib/session.js`, `lib/rate-limit.js`, `lib/handlers.js` shared by middleware, functions, dev server, tests
+- `lib/session.js`, `lib/rate-limit.js`, `lib/handlers.js` shared by middleware, functions, dev server, tests;
+  `lib/node-adapter.js` lets Vercel call the Web-style handlers with Node's `(req, res)`
 - `scripts/dev-server.mjs` local Vercel stand-in (runs the real middleware + handlers)
 - `secrets/gift-cards.json` git-ignored source of truth for the codes
 - `tests/` `node --test`

@@ -8,7 +8,7 @@ Vercel Routing Middleware, with three Vercel Functions in `api/`.
 
 ```bash
 npm run dev    # http://localhost:4173 with automatic refresh
-npm run build  # generate the eight guide pages
+npm run build  # generate the seven guide pages
 npm test       # build pages, then run the Node test suite
 ```
 
@@ -22,7 +22,6 @@ Vercel runs `npm run build` and serves the `public/` directory with clean URLs.
 - `/`: restaurant guide and personal introduction
 - `/map`: interactive map and restaurant list
 - `/gift-cards`: links to all four private gift cards
-- `/about`: a simple welcome
 - `/restaurants/<id>`: complete restaurant page and authenticated gift card panel
 - `/login`: password form
 - `/dc-map`: the Leaflet map frame used by `/map`
@@ -35,8 +34,9 @@ use progressive enhancement. The login and logout forms also submit without JS.
 
 - `scripts/build-pages.mjs`: shared HTML layout and page copy. Edit this source,
   then build; do not hand-edit its generated pages.
-- `scripts/artwork.mjs`: original inline SVG dining illustrations.
-- `public/scripts/restaurants.js`: public restaurant details and gift metadata.
+- `scripts/artwork.mjs`: original inline SVG homepage illustration.
+- `public/scripts/restaurants.js`: public restaurant details, photos, and gift metadata.
+- `public/images/restaurants/`: local website photos in two sizes, with provenance in `SOURCES.md`.
 - `public/styles/organic.css`: local font declarations, tokens, and basic controls.
 - `public/styles/site.css`, `login.css`, `map.css`: page styles.
 - `public/scripts/site.js`: private card loading, copying, map selection.

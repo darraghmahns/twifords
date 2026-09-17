@@ -51,6 +51,7 @@ watch(path.join(root, 'scripts'), (_event, file) => {
 });
 const MIME = {
   '.html': 'text/html; charset=utf-8', '.css': 'text/css; charset=utf-8', '.js': 'text/javascript; charset=utf-8',
+  '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg',
   '.woff2': 'font/woff2', '.png': 'image/png', '.svg': 'image/svg+xml', '.json': 'application/json; charset=utf-8',
 };
 
@@ -106,6 +107,11 @@ const server = http.createServer(async (req, res) => {
 
     const mw = await middleware(request);
     if (mw && !mw.headers.has('x-middleware-next')) return send(res, mw);
+
+    if (url.pathname === '/about' || url.pathname === '/about.html') {
+      res.writeHead(308, { location: '/' });
+      return res.end();
+    }
 
     const handler = api[url.pathname];
     if (handler) return send(res, await handler(request));

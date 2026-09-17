@@ -27,8 +27,8 @@
 .restaurant-card { min-width: 0; }
 .restaurant-link { display: block; text-decoration: none; }
 .card-art { position: relative; overflow: hidden; aspect-ratio: 1.25; border-radius: 18px; margin-bottom: 20px; }
-.card-art svg { width: 100%; height: 100%; display: block; transition: transform .25s ease; }
-.restaurant-link:hover .card-art svg { transform: scale(1.035); }
+.card-art .restaurant-photo { width: 100%; height: 100%; display: block; transition: transform .25s ease; }
+.restaurant-link:hover .card-art .restaurant-photo { transform: scale(1.035); }
 .peach { background: var(--peach); }
 .sage { background: var(--sage); }
 .butter { background: var(--butter); }
@@ -55,7 +55,7 @@
 .breadcrumb a:hover { text-decoration: underline; }
 .detail-grid { display: grid; grid-template-columns: 1.1fr 1fr; gap: 64px; align-items: start; margin-bottom: 64px; }
 .detail-art { border-radius: 18px; aspect-ratio: 1.5; overflow: hidden; margin-bottom: 30px; }
-.detail-art svg { display: block; width: 100%; height: 100%; }
+.detail-art .restaurant-photo { display: block; width: 100%; height: 100%; }
 .detail-copy h2 { font-size: 30px; margin-bottom: 17px; }
 .detail-copy > p { max-width: 52ch; color: var(--muted); }
 .detail-meta { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 22px; }
@@ -105,13 +105,6 @@
 .wallet-card p { font-size: 13px; margin-top: 9px; }
 .wallet-card .wallet-bottom { margin-top: auto; padding-top: 34px; display: flex; justify-content: space-between; gap: 15px; font-size: 13px; }
 .wallet-help { margin-bottom: 60px; max-width: 65ch; color: var(--muted); font-size: 14px; }
-.about-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 65px; padding-bottom: 70px; }
-.letter { background: var(--wash); border-radius: 18px; padding: 40px; }
-.letter h2 { font-size: 34px; margin-bottom: 25px; }
-.letter p + p { margin-top: 20px; }
-.instructions h2 { font-size: 30px; margin-bottom: 22px; }
-.instructions h3 { font-size: 18px; margin-block: 24px 9px; }
-.instructions p { color: var(--muted); font-size: 15px; }
 @media (min-width: 1400px) { .hero { gap: 80px; } }
 @media (max-width: 1050px) { .container { width: calc(100% - 64px); } .hero { gap: 30px; } .restaurant-grid { gap: 18px; grid-template-columns: repeat(2, minmax(0, 1fr)); row-gap: 35px; } .detail-grid { gap: 32px; } .map-layout { grid-template-columns: 290px minmax(0, 1fr); gap: 20px; } }
 @media (max-width: 700px) {
@@ -145,8 +138,7 @@
   .page-intro { padding-block: 34px 28px; }
   .page-intro h1 { font-size: 47px; }
   .page-intro p { font-size: 16px; }
-  .detail-grid, .about-grid { grid-template-columns: 1fr; gap: 32px; }
-  .detail-grid { margin-bottom: 35px; }
+  .detail-grid { grid-template-columns: 1fr; gap: 32px; margin-bottom: 35px; }
   .detail-art { aspect-ratio: 1.6; margin-bottom: 25px; }
   .voucher-top, .voucher-body { padding: 24px; }
   .voucher-amount { font-size: 40px; }
@@ -156,7 +148,6 @@
   .map-frame { order: -1; min-height: 380px; height: 52vh; }
   .map-frame iframe { min-height: 380px; height: 100%; }
   .map-list { display: grid; grid-template-columns: 1fr; }
-  .letter { padding: 28px; }
 }
 @media print {
   .site-header, .site-footer, .breadcrumb, .detail-copy, .more-restaurants, .copy-button, .skip-link { display: none !important; }
@@ -185,12 +176,13 @@
 .voucher-amount { font-family: var(--font-body); font-weight: 650; }
 .voucher-top h2 { font-size: 27px; }
 .home-note h2 { font-size: 29px; }
-.home-note, .letter { background: #fbeeec; }
+.home-note { background: #fbeeec; }
 @keyframes heartbeat { 0%, 100% { transform: scale(1); } 45% { transform: scale(1.1); } }
 @keyframes arrive { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 @media (max-width: 700px) { .brand { font-size: 18px; } .hero h1 { font-size: clamp(40px, 10.9vw, 64px); } .hero h1 { max-width: 12ch; } .page-intro h1 { font-size: 40px; } .section-heading h2 { font-size: 29px; } }
 @media (prefers-reduced-motion: reduce) { .brand-icon, .hero-art { animation: none; } }
 @media print { .voucher-top { background: white; } }
-
-.welcome-page { min-height: 65svh; display: grid; place-items: center; padding-block: 60px; text-align: center; }
-.welcome-page h1 { color: var(--accent); font-size: clamp(36px, 6vw, 76px); }
+.restaurant-photo { object-fit: cover; }
+.photo-daikaya { object-position: 50% 64%; }
+.photo-carusos-grocery { object-position: 55% 50%; }
+.photo-le-diplomate { object-position: 60% 50%; }

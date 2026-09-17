@@ -135,3 +135,12 @@ test('gift-cards: misconfiguration never leaks details', async () => {
   }
   assert.equal((await createGiftCardsHandler({ env })(new Request('https://x.test/api/gift-cards', { method: 'POST' }))).status, 405);
 });
+
+test('logout form works without JavaScript and returns to sign in', async () => {
+  const response = await createLogoutHandler()(new Request('https://x.test/api/logout', {
+    method: 'POST', headers: { 'content-type': 'application/x-www-form-urlencoded' }, body: '',
+  }));
+  assert.equal(response.status, 303);
+  assert.equal(response.headers.get('location'), 'https://x.test/login');
+  assert.match(response.headers.get('set-cookie'), /Max-Age=0/);
+});

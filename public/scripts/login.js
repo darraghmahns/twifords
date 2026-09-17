@@ -36,7 +36,7 @@ form.addEventListener('submit', async (event) => {
   }
   showError('');
   submitEl.disabled = true;
-  submitEl.textContent = 'Opening…';
+  submitEl.textContent = 'Signing in…';
   try {
     const response = await fetch('/api/login', {
       method: 'POST',
@@ -55,6 +55,6 @@ form.addEventListener('submit', async (event) => {
     showError('Could not reach the site. Check your connection and try again.');
   } finally {
     submitEl.disabled = false;
-    submitEl.textContent = 'Open the book';
+    submitEl.textContent = 'Sign in';
   }
 });

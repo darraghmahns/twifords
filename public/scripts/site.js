@@ -1,151 +1,79 @@
-import { RESTAURANTS, PRESENTED_TO } from './restaurants.js';
+import { RESTAURANTS } from './restaurants.js';
 import { buildVoucherView } from './voucher-model.js';
-
-const state = {
-  selected: 0,
-  cards: { status: 'loading', byId: null },
-};
-
-const pinsEl = document.getElementById('pins');
-const voucherEl = document.getElementById('voucher');
-const mapFrame = document.getElementById('dcmap');
-const logoutEl = document.getElementById('logout');
 
 const escapeHtml = (value) => String(value)
   .replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;')
   .replaceAll('"', '&quot;').replaceAll("'", '&#39;');
 
-const heart = '<svg class="icon-heart" aria-hidden="true"><use href="#icon-heart"/></svg>';
-
-function select(index, { focusMap } = { focusMap: false }) {
-  if (!Number.isInteger(index) || index < 0 || index >= RESTAURANTS.length) return;
-  state.selected = index;
-  render();
-  if (focusMap && mapFrame && mapFrame.contentWindow) {
-    mapFrame.contentWindow.postMessage({ type: 'focus', index }, window.location.origin);
-  }
-}
-
-function renderPins() {
-  pinsEl.replaceChildren(...RESTAURANTS.map((r, i) => {
-    const btn = document.createElement('button');
-    btn.type = 'button';
-    btn.className = 'pin-chip';
-    btn.setAttribute('aria-pressed', String(i === state.selected));
-    btn.innerHTML = `<span class="pin-chip-num">${escapeHtml(r.numeral)}</span>${escapeHtml(r.neighborhood)}`;
-    btn.addEventListener('click', () => select(i, { focusMap: true }));
-    return btn;
-  }));
-}
+const voucher = document.querySelector('[data-card-id]');
+const details = document.getElementById('card-details');
+const restaurant = RESTAURANTS.find((r) => r.id === voucher?.dataset.cardId);
 
 function renderCard(card) {
-  const head = `<div class="gift-row"><span class="gift-title">${escapeHtml(card.label)}</span><span class="gift-amount">${escapeHtml(card.amount)}</span></div>`;
-
   if (card.status === 'loading') {
-    return `<div class="gift">${head}<p class="gift-hint">Fetching your gift card…</p></div>`;
+    details.innerHTML = '<p role="status">Loading your gift card…</p>';
+    return;
   }
   if (card.status === 'error' || card.status === 'missing') {
-    const message = card.status === 'error'
-      ? 'We could not load the gift card details right now.'
-      : 'This card’s details have not been added yet. Ask Rae Rae &amp; Darragh.';
-    return `<div class="gift">${head}<p class="gift-error" role="alert">${message}</p>
-      ${card.status === 'error' ? '<div class="gift-links"><button type="button" class="btn btn-secondary" id="retry-cards">Try again</button></div>' : ''}
-    </div>`;
+    details.innerHTML = `<p class="gift-error" role="alert">${card.status === 'missing' ? 'This card’s details haven’t been added yet. Check with Rae Rae or Darragh.' : 'Your gift card couldn’t load. Check your connection and try again.'}</p><button class="btn btn-secondary" type="button" id="retry-cards">Try again</button>`;
+    document.getElementById('retry-cards').addEventListener('click', loadGiftCard);
+    return;
   }
-
-  const fields = card.fields.length
-    ? `<div class="gift-fields">${card.fields.map((f) => `<div class="gift-field"><span class="gift-field-label">${escapeHtml(f.label)}</span><span class="gift-field-value">${escapeHtml(f.value)}</span></div>`).join('')}</div>`
-    : '';
-  const links = card.links.length
-    ? `<div class="gift-links">${card.links.map((l) => `<a class="btn ${l.primary ? 'btn-primary' : 'btn-secondary'}" href="${escapeHtml(l.href)}" target="_blank" rel="noopener">${escapeHtml(l.label)}</a>`).join('')}</div>`
-    : '';
-  const note = card.note ? `<p class="gift-note">${escapeHtml(card.note)}</p>` : '';
-  return `<div class="gift">${head}${fields}${links}<p class="gift-hint">${escapeHtml(card.howTo)}</p>${note}</div>`;
+  details.innerHTML = `${card.fields.length ? `<div class="gift-fields">${card.fields.map((field, i) => `<div class="gift-field"><div><span class="gift-field-label">${escapeHtml(field.label)}</span><span class="gift-field-value">${escapeHtml(field.value)}</span></div><button type="button" class="copy-button" data-copy="${i}" aria-label="Copy ${escapeHtml(field.label.toLowerCase())}">Copy</button></div>`).join('')}</div>` : ''}
+    <div class="gift-links">${card.links.map((link) => `<a class="btn ${link.primary ? 'btn-primary' : 'btn-secondary'}" href="${escapeHtml(link.href)}" target="_blank" rel="noopener noreferrer">${escapeHtml(link.label)}</a>`).join('')}</div>
+    <p class="gift-hint">${escapeHtml(card.howTo)}</p><p class="copy-status" id="copy-status" role="status"></p>`;
+  details.querySelectorAll('[data-copy]').forEach((button) => {
+    button.addEventListener('click', async () => {
+      const field = card.fields[Number(button.dataset.copy)];
+      try {
+        await navigator.clipboard.writeText(String(field.value));
+        document.getElementById('copy-status').textContent = `${field.label} copied.`;
+      } catch {
+        document.getElementById('copy-status').textContent = 'Copy isn’t available here. Select the details above to copy them.';
+      }
+    });
+  });
 }
 
-function renderVoucher() {
-  const view = buildVoucherView(RESTAURANTS[state.selected], state.cards);
-  voucherEl.innerHTML = `
-    <div class="voucher-head">
-      <div class="voucher-head-row">
-        <span class="voucher-label">The Twiford Book · Gift Card</span>
-        <span class="voucher-no">No. ${escapeHtml(view.numeral)}</span>
-      </div>
-      <h3 class="voucher-name">${escapeHtml(view.name)}</h3>
-      <div class="voucher-meta"><span>${escapeHtml(view.neighborhood)}</span><span>·</span><span>${escapeHtml(view.cuisine)}</span></div>
-    </div>
-    <div class="voucher-body">
-      <div class="voucher-pick">
-        <span class="voucher-pick-icon">${heart}</span>
-        <div>
-          <span class="voucher-pick-label">Rae &amp; Darragh’s pick</span>
-          <p class="voucher-pick-text">${escapeHtml(view.tip)}</p>
-        </div>
-      </div>
-      ${renderCard(view.card)}
-      <p class="voucher-fine">${escapeHtml(view.fine)}</p>
-      <div class="voucher-presented">
-        <div class="voucher-to">
-          <span class="voucher-to-label">Presented to</span>
-          <span class="voucher-to-name">${escapeHtml(PRESENTED_TO)}</span>
-        </div>
-        <div class="voucher-stamp" aria-hidden="true">STAMP<br>HERE</div>
-      </div>
-      <div class="voucher-actions">
-        <a href="${escapeHtml(view.webHref)}" target="_blank" rel="noopener" class="btn btn-primary">Visit &amp; reserve</a>
-        <button type="button" class="btn btn-secondary" id="print-voucher">Save / print gift card</button>
-      </div>
-    </div>`;
-
-  document.getElementById('print-voucher').addEventListener('click', () => window.print());
-  const retry = document.getElementById('retry-cards');
-  if (retry) retry.addEventListener('click', loadGiftCards);
-}
-
-function render() {
-  renderPins();
-  renderVoucher();
-}
-
-async function loadGiftCards() {
-  state.cards = { status: 'loading', byId: null };
-  render();
+async function loadGiftCard() {
+  renderCard({ status: 'loading' });
   try {
-    const response = await fetch('/api/gift-cards', { credentials: 'same-origin', headers: { accept: 'application/json' } });
+    const response = await fetch('/api/gift-cards', { credentials: 'same-origin', cache: 'no-store', headers: { accept: 'application/json' }, signal: AbortSignal.timeout(15000) });
     if (response.status === 401) {
       window.location.replace('/login?next=' + encodeURIComponent(window.location.pathname + window.location.hash));
       return;
     }
-    if (!response.ok) throw new Error(`gift-cards responded ${response.status}`);
+    if (!response.ok) throw new Error('Gift card request failed');
     const byId = await response.json();
-    if (!byId || typeof byId !== 'object' || Array.isArray(byId)) throw new Error('gift-cards returned an unexpected shape');
-    state.cards = { status: 'ready', byId };
-  } catch (err) {
-    console.error(err);
-    state.cards = { status: 'error', byId: null };
+    if (!byId || typeof byId !== 'object' || Array.isArray(byId)) throw new Error('Invalid gift card response');
+    renderCard(buildVoucherView(restaurant, { status: 'ready', byId }).card);
+  } catch {
+    renderCard({ status: 'error' });
   }
-  render();
+}
+if (restaurant && details) {
+  loadGiftCard();
+  // Restore fresh private details when returning through the browser's back/forward cache.
+  window.addEventListener('pageshow', (event) => { if (event.persisted) loadGiftCard(); });
 }
 
-async function logout(event) {
-  event.preventDefault();
-  try {
-    await fetch('/api/logout', { method: 'POST', credentials: 'same-origin' });
-  } catch (err) {
-    console.error(err);
-  }
-  window.location.replace('/login');
+const mapFrame = document.getElementById('dcmap');
+if (mapFrame) {
+  document.querySelectorAll('[data-focus]').forEach((button) => {
+    button.hidden = false;
+    button.addEventListener('click', () => {
+      const index = Number(button.dataset.focus);
+      mapFrame.contentWindow?.postMessage({ type: 'focus', index }, window.location.origin);
+      mapFrame.scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth', block: 'center' });
+    });
+  });
+  window.addEventListener('message', (event) => {
+    if (event.origin !== window.location.origin || event.source !== mapFrame.contentWindow) return;
+    const { type, index } = event.data || {};
+    if (type !== 'select' || !Number.isInteger(index) || !RESTAURANTS[index]) return;
+    document.querySelectorAll('[data-restaurant-index]').forEach((entry) => {
+      if (Number(entry.dataset.restaurantIndex) === index) entry.setAttribute('aria-current', 'true');
+      else entry.removeAttribute('aria-current');
+    });
+  });
 }
-
-window.addEventListener('message', (event) => {
-  if (event.origin !== window.location.origin) return;
-  const data = event.data || {};
-  if ((data.type === 'select' || data.type === 'gotocard') && Number.isInteger(data.index)) {
-    select(data.index);
-    if (data.type === 'gotocard') voucherEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
-  }
-});
-
-if (logoutEl) logoutEl.addEventListener('click', logout);
-render();
-loadGiftCards();

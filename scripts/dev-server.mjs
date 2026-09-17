@@ -2,7 +2,8 @@
 // Local stand-in for Vercel: serves public/ with cleanUrls, runs middleware.js on every request,
 // and routes /api/* to the same handlers Vercel deploys. Loads .env.local when present.
 import http from 'node:http';
-import { existsSync } from 'node:fs';
+import { existsSync, watch } from 'node:fs';
+import { execFile } from 'node:child_process';
 import { readFile, stat } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -20,6 +21,34 @@ const api = {
 };
 
 const PORT = Number(process.env.PORT || 4173);
+const previewClients = new Set();
+let reloadTimer;
+let buildTimer;
+let building = false;
+let rebuildPending = false;
+function rebuild() {
+  if (building) { rebuildPending = true; return; }
+  building = true;
+  execFile(process.execPath, ['scripts/build-pages.mjs'], { cwd: root }, (error) => {
+    building = false;
+    if (error) console.error('Page build failed:', error.message);
+    if (rebuildPending) { rebuildPending = false; rebuild(); }
+  });
+}
+function scheduleBuild() {
+  clearTimeout(buildTimer);
+  buildTimer = setTimeout(rebuild, 100);
+}
+watch(publicDir, { recursive: true }, (_event, file) => {
+  if (file === 'scripts/restaurants.js') scheduleBuild();
+  clearTimeout(reloadTimer);
+  reloadTimer = setTimeout(() => {
+    for (const client of previewClients) client.write('data: reload\n\n');
+  }, 250);
+});
+watch(path.join(root, 'scripts'), (_event, file) => {
+  if (file === 'build-pages.mjs' || file === 'artwork.mjs') scheduleBuild();
+});
 const MIME = {
   '.html': 'text/html; charset=utf-8', '.css': 'text/css; charset=utf-8', '.js': 'text/javascript; charset=utf-8',
   '.woff2': 'font/woff2', '.png': 'image/png', '.svg': 'image/svg+xml', '.json': 'application/json; charset=utf-8',
@@ -62,6 +91,19 @@ const server = http.createServer(async (req, res) => {
     const request = await toRequest(req);
     const url = new URL(request.url);
 
+    // Development-only refresh endpoints. These never serve site or card data.
+    if (url.pathname === '/__dev/events') {
+      res.writeHead(200, { 'content-type': 'text/event-stream', 'cache-control': 'no-store', connection: 'keep-alive' });
+      res.write(': connected\n\n');
+      previewClients.add(res);
+      res.on('close', () => previewClients.delete(res));
+      return;
+    }
+    if (url.pathname === '/__dev/live.js') {
+      res.writeHead(200, { 'content-type': MIME['.js'], 'cache-control': 'no-store' });
+      return res.end("new EventSource('/__dev/events').onmessage = () => location.reload();");
+    }
+
     const mw = await middleware(request);
     if (mw && !mw.headers.has('x-middleware-next')) return send(res, mw);
 
@@ -83,7 +125,11 @@ const server = http.createServer(async (req, res) => {
     }
     res.statusCode = 200;
     res.setHeader('content-type', MIME[path.extname(file)] || 'application/octet-stream');
-    res.end(await readFile(file));
+    res.setHeader('cache-control', 'no-store');
+    const contents = await readFile(file);
+    res.end(path.extname(file) === '.html'
+      ? contents.toString().replace('</body>', '<script src="/__dev/live.js"></script></body>')
+      : contents);
   } catch (err) {
     console.error(err);
     res.statusCode = 500;
@@ -92,7 +138,7 @@ const server = http.createServer(async (req, res) => {
   }
 });
 
-server.listen(PORT, () => {
+server.listen(PORT, 'localhost', () => {
   console.log(`The Twifords Try D.C. → http://localhost:${PORT}`);
   if (!process.env.SITE_PASSWORD || !process.env.SESSION_SECRET) console.warn('warning: SITE_PASSWORD / SESSION_SECRET not set; copy .env.example to .env.local');
   if (!process.env.GIFT_CARDS_JSON) console.warn('warning: GIFT_CARDS_JSON not set; gift cards will show as unavailable');

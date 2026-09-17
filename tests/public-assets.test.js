@@ -22,13 +22,15 @@ async function walk(dir) {
 const isText = (file) => /\.(html|css|js|json|svg|txt)$/.test(file);
 
 test('local asset references in the HTML pages resolve to real files', async () => {
-  for (const page of ['index.html', 'dc-map.html', 'login.html']) {
+  for (const file of (await walk(publicDir)).filter((file) => file.endsWith('.html'))) {
+    const page = path.relative(publicDir, file);
     const html = await readFile(path.join(publicDir, page), 'utf8');
     const refs = [...html.matchAll(/\b(?:src|href)="([^"]+)"/g)].map((m) => m[1]);
     const local = refs.filter((r) => !/^(https?:|data:|#|mailto:|\/login$)/.test(r));
     assert.ok(local.length > 0, `${page} should reference local assets`);
     for (const ref of local) {
-      const target = path.join(publicDir, ref.split('#')[0]);
+      const pathname = ref.split('#')[0].split('?')[0];
+      const target = pathname.startsWith('/') ? path.join(publicDir, pathname) : path.resolve(publicDir, path.dirname(page), pathname);
       // cleanUrls: a bare "dc-map" reference is served from dc-map.html
       assert.ok(existsSync(target) || existsSync(`${target}.html`), `${page} references missing file ${ref}`);
     }
@@ -93,4 +95,20 @@ test('fonts and Leaflet are vendored, not fetched from a CDN', async () => {
   }
   const organic = await readFile(path.join(publicDir, 'styles', 'organic.css'), 'utf8');
   assert.ok(!/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}/.test(organic), 'organic.css still points at bundle UUID font URLs');
+});
+
+ test('restaurant details are complete static pages and internal navigation uses page URLs', async () => {
+  const { RESTAURANTS } = await import('../public/scripts/restaurants.js');
+  const home = await readFile(path.join(publicDir, 'index.html'), 'utf8');
+  for (const restaurant of RESTAURANTS) {
+    const route = `/restaurants/${restaurant.id}`;
+    assert.ok(home.includes(`href="${route}"`));
+    const html = await readFile(path.join(publicDir, route + '.html'), 'utf8');
+    assert.match(html, /<h1>[^<]+<\/h1>/);
+    assert.ok(html.includes(restaurant.web));
+    assert.ok(html.includes(restaurant.neighborhood));
+    assert.ok(html.includes('id="gift-card"'));
+    assert.ok(html.includes('href="/gift-cards"'));
+    assert.ok(html.includes('href="/map"'));
+  }
 });

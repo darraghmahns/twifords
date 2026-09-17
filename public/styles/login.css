@@ -1,30 +1,4 @@
-/* Layout for login.html. */
-html, body { min-height: 100%; }
-.login {
-  position: relative; overflow: clip; min-height: 100vh;
-  display: grid; place-items: center; padding: clamp(20px, 5vw, 72px);
-}
-.login-blob { position: absolute; border-radius: 50%; z-index: 0; }
-.login-blob-rose { right: -160px; top: -190px; width: 420px; height: 420px; background: var(--color-accent-2-200); }
-.login-blob-red { left: -120px; bottom: -140px; width: 300px; height: 300px; background: var(--color-accent-100); }
-.login-card {
-  position: relative; z-index: 1; width: min(440px, 100%);
-  display: flex; flex-direction: column; gap: 14px;
-  background: var(--color-bg); border: 1.5px solid var(--color-accent-200);
-  border-radius: var(--radius-lg); padding: clamp(28px, 4vw, 44px); box-shadow: var(--shadow-md);
-}
-.login-mark {
-  display: grid; place-content: center; width: 48px; height: 48px; border-radius: 999px;
-  background: var(--color-accent); color: var(--color-bg);
-}
-.login-mark svg { width: 24px; height: 24px; }
-.login-kicker {
-  font-size: 13px; letter-spacing: 0.14em; text-transform: uppercase; font-weight: 700;
-  color: var(--color-accent-700);
-}
-.login-title { font-size: clamp(30px, 4vw, 40px); line-height: 1.02; margin: 0; color: var(--color-accent); }
-.login-lede { font-size: 15.5px; line-height: 1.6; margin: 0 0 8px; color: color-mix(in srgb, var(--color-text) 78%, transparent); }
-.login-field { display: flex; flex-direction: column; gap: 6px; font-size: 13px; color: color-mix(in srgb, var(--color-text) 70%, transparent); }
-.login-field .input { font-size: 16px; min-height: 44px; }
-.login-error { font-size: 13.5px; margin: 0; color: var(--color-accent-700); }
-.login-submit { font-size: 15px; padding: 12px 22px; }
+.login { min-height: 100svh; display: grid; place-items: center; padding: 24px; }
+.login-card { width: min(360px, 100%); }
+.login-submit { width: 100%; margin-top: 16px; }
+.login-error { color: #983b20; font-size: 14px; margin-top: 12px; }

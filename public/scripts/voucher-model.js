@@ -6,7 +6,7 @@ const PROVIDER_COPY = {
   giftrocker: 'Show the QR code from the PDF or your Apple Wallet pass when you check out.',
 };
 
-const FINE_PRINT = 'Show this gift card when you arrive. One redemption per table.';
+const FINE_PRINT = 'The card provider’s terms apply. Amounts shown are original gift values, not live balances.';
 
 function formatAmount(amount) {
   return `$${Number(amount).toFixed(0)}`;

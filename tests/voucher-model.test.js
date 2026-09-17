@@ -25,7 +25,8 @@ test('copies the restaurant basics onto the view', () => {
   assert.equal(view.numeral, 'I');
   assert.equal(view.name, 'Daikaya');
   assert.equal(view.webHref, 'https://daikaya.com');
-  assert.match(view.fine, /one redemption/i);
+  assert.match(view.fine, /provider’s terms/i);
+  assert.doesNotMatch(view.fine, /one redemption/i);
 });
 
 test('a restaurant without gift card metadata is a programming error', () => {

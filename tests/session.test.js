@@ -69,7 +69,7 @@ test('only the login page and its assets are public', () => {
   for (const p of ['/login', '/login.html', '/api/login', '/styles/site.css', '/fonts/figtree-latin.woff2', '/scripts/login.js', '/scripts/next-path.js']) {
     assert.equal(isPublicPath(p), true, p);
   }
-  for (const p of ['/', '/index.html', '/dc-map.html', '/scripts/site.js', '/scripts/restaurants.js', '/vendor/leaflet-1.9.4.min.js', '/api/gift-cards', '/api/logout', '/styles', '/logins']) {
+  for (const p of ['/', '/index.html', '/map', '/gift-cards', '/about', '/restaurants/daikaya', '/restaurants/perrys.html', '/dc-map.html', '/scripts/site.js', '/scripts/restaurants.js', '/vendor/leaflet-1.9.4.min.js', '/api/gift-cards', '/api/logout', '/styles', '/logins']) {
     assert.equal(isPublicPath(p), false, p);
   }
 });

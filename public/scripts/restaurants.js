@@ -32,7 +32,7 @@ export const RESTAURANTS = [
   },
   {
     id: 'perrys', numeral: 'IV', name: "Perry's", neighborhood: 'Adams Morgan', cuisine: 'Japanese & sushi',
-    web: 'https://perrysadamsmorgan.com', lat: 38.9218, lng: -77.0429,
+    web: 'https://www.perrysam.com/', lat: 38.9218, lng: -77.0429,
     description: 'Japanese food, sushi, and a rooftop in Adams Morgan.',
     tip: 'A Japanese restaurant with sushi and a rooftop in Adams Morgan.',
     color: 'lilac',
